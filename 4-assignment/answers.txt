@@ -1,0 +1,20 @@
+Name: Nattapat Juthaprachakul, Student ID: 301350117
+
+QUESTION: Assignment 4
+In a text file answers.txt, answer these questions:
+
+1.  How much of a difference did the .cache() make in your Reddit ETL code?
+    ANS: All codes run on the cluster.
+         For reddit-1 dataset, reddit_etl without .cache() takes 27.765s while reddit_etl with .cache() takes 24.617s.
+         For reddit-3 dataset, reddit_etl without .cache() takes 33.549s while reddit_etl with .cache() takes 30.754s.
+         For reddit-4 dataset, reddit_etl without .cache() takes 47.566s while reddit_etl with .cache() takes 32.670s.
+     We can clearly see that with .cache() our code runs faster in every dataset.
+
+2.  When would .cache() make code slower than without?
+    ANS: .cache() helps speed up the applications that access the same RDD multiple times and if an RDD is not .cached(), it will be re-evaluated again each time if there is action invoked on that RDD. Therefore, it is suitable for applications that re-use RDD for multiple times and have RDD that are expensive to re-evaluate. However, caching is not recommended for working with unbalanced RDD since the unbalanced partition of RDD might not fit into the cache storage and will be evicted before actually being used.  
+
+3.  Under what conditions will the broadcast join be faster than an actual join?
+    ANS: broadcast join will be faster when we are joining unbalanced RDD together instead of using .cache(). For example, it is recommended to broadcast smaller dataset to join with the bigger one. The smaller RDD will be broadcasted to the executor nodes and will be merged there with existing stored data (no shuggle operation required). This helps solve the problem of uneven RDD partitions and limited parallelism.
+
+4.  When will the broadcast join be slower? 
+    ANS: the broadcast join might not be feasible if both RDDs that we wish to join are both big. There is some cost for a broadcast operation which is a cost of communication through driver.

@@ -1,0 +1,40 @@
+Name: Nattapat Juthaprachakul 
+Computing ID: njuthapr
+Student ID: 301350117
+
+Assignment 7 on CMPT-732
+Questions 
+
+1. What happened when you inserted another row with the same primary key as an existing row? 
+ANS: It will overwrite the existing value in the same primary key 
+(the effect is very similar to UPDATE that we use before).
+
+2. What happened when you query a keyspace with replication factor 1 and one node down? How did it behave with replication factor 2 and a node down? 
+ANS: With a keyspace with replication factor 1, when the node is down, 
+I get this error message 'NoHostAvailable: ('Unable to complete the operation against any hosts', {})' when using 'SELECT * FROM' command. However, I still can use 'INSERT' command.
+
+For a keyspace with replication factor 2 and a down node, all operations work fine (there is no error message). 
+
+3.How did the consistency level affect the results with the node up/down?
+ANS: CONSISTENCY ONE and the node is either up or down, I don't get any error message.
+     CONSISTENCY ALL and the node is down, I get error message NoHostAvailable and Unavailable exception for "SELECT * FROM test" command and some "INSERT INTO test VALUES","SELECT * FROM test WHERE id =" commands which depend on id. 
+However,some "INSERT INTO test VALUES" and "SELECT * FROM test WHERE id =" commands are working fine.  
+     CONSISTENCY ALL and the node is up, I don't get any error message.
+
+
+4.Which of the WHERE id=? values returned successfully with CONSISTENCY ALL when one of the nodes was down? Why do you think some could be returned but not others?
+ANS: Only id =1 and id =4 return successfully for commands "SELECT * FROM test WHERE id=;". I think because for id=1 and id =4 all of its copies are kept in the up node; however, for id =2,3,5 the copies are being distributed and some are kept in the down node.  
+
+5.What was the CREATE TABLE statement you used for the nasalogs table? What was the primary key you choose, and why?
+ANS: CREATE TABLE nasalogs ( host text, datetime timestamp, path text, bytes int,primary key (host, uuid) ); The primary key I choose is "host" and "uuid" because we want to calculate same host bytes-transferred correlation calculation; thus, host key is our main focus here. 
+Also, uuid helps give a unique key to each record which allows the hosts to be able to differentiate among themselves as there are many records that have same host names (as well as path, datetime, and bytes).
+
+6.What was the CQL query you used (or tried) to get the total number of bytes?
+ANS: SELECT SUM(bytes) FROM nasalogs;
+
+
+
+
+
+
+

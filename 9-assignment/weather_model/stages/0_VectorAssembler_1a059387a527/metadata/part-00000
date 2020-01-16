@@ -1,0 +1,1 @@
+{"class":"org.apache.spark.ml.feature.VectorAssembler","timestamp":1572677371466,"sparkVersion":"2.4.4","uid":"VectorAssembler_1a059387a527","paramMap":{"inputCols":["yesterday_tmax","day_of_year","latitude","longitude","elevation"],"outputCol":"features"},"defaultParamMap":{"handleInvalid":"error","outputCol":"VectorAssembler_1a059387a527__output"}}

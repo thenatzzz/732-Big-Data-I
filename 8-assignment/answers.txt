@@ -1,0 +1,61 @@
+Name: Nattapat Juthaprachakul
+ID: 301350117
+Computing id: njuthapr
+
+CMPT-732 Assignment-8
+1.What did you see in the execution plan for the “join in Spark” solution? Why was the execution so fast (and the memory usage so small)?
+ANS: I think it is because of Spark lazy evaluation. Even though our code looks like we try to load all contents from 3 big databases into dataframe (which is very expensive operation), 
+the actual execution/action happens after Spark has chance to see overall operations.
+Therefore, Spark can optimize the operations before actually executing the plans as we see in the PushedFilters arguments where Spark does not load every column to our dataframe but instead does load only columns that are needed for our joining operation.  
+
+2.What was the CREATE TABLE statement you used for the orders_parts table?
+ANS: CREATE TABLE orders_parts ( orderkey int, custkey int, orderstatus text, totalprice decimal, orderdate date, order_priority text, clerk text, ship_priority int, comment text, PRIMARY KEY (orderkey), part_names set<text>);
+
+
+3.What were the running times of the two tpch_orders_* programs on the tpch2 data on the cluster? These orderkeys have results in that data set: 2579142 2816486 586119 441985 2863331.
+ANS: Running time for tpch_orders_df.py is 1m13s while the running time for tpch_orders_denorm.py is 45s. The denormalization method is faster. 
+Results:
+    Order #441985 $160494.03: antique thistle light deep orchid, bisque misty firebrick green sky, blush papaya sandy lemon cornsilk, indian maroon white chiffon saddle, steel mint violet seashell lawn
+    Order #586119 $21769.33: smoke black burnished steel midnight
+    Order #2579142 $236102.74: blanched steel khaki gainsboro navajo, lime burnished lavender mint sandy, olive midnight sandy maroon mint, papaya cornsilk honeydew chartreuse plum, smoke salmon red pale linen, snow seashell tan powder beige
+    Order #2816486 $144288.22: forest lime honeydew khaki slate, light blue dark azure salmon, thistle spring purple navajo pale
+    Order #2863331 $29684.91: almond cyan grey hot saddle
+
+4.Consider the logic that you would have to implement to maintain the denormalized data (assuming that the orders table had the part_names column in the main data set). 
+Write a few sentences on what you'd have to do when inserting/updating/deleting data in this case.
+ANS:
+The operations are normal CQL operations except 'set' datatype in 'part_names' column.
+For 'part_names' column, the INSERT/UPDATE/DELETE operations are as following:
+1. INSERT: use {} for SET column
+   INSERT INTO orders_parts  (orderkey,clerk,comment,custkey,order_priority,orderdate,orderstatus,part_names,ship_priority,totalprice) 
+VALUES  (12345678,'Jim','Good',222,'d','11111','YES',{'dsadasd','sdasd'},15,444); 
+2. UPDATE (add element to an existing SET): use plus sign(+)
+   2.1 #update part_names column by adding 1 element to existing set (part_names column)
+       UPDATE orders_parts SET part_names = part_names + {'add 1'} 
+WHERE orderkey = 12345678;
+   2.2 # update part_names column by adding more than 1 elements to existing set (part_names column) 
+       UPDATE orders_parts SET part_names = part_names + {'b-extra additional data','z data'}WHERE orderkey = 12345678;
+3. DELETE existing element from existing set: use minus sign(-)
+   3.1 # delete 1 element in part_names column (set)
+       UPDATE orders_parts SET part_names = part_names - {'b-extra additional data'} WHERE orderkey = 12345678;
+   3.2 # delete more than 1 elements in part_names column (set)
+       UPDATE orders_parts SET part_names = part_names - {'z data','add 1'} WHERE orderkey = 12345678;
+      
+4. DELETE all elements from existing set 
+       UPDATE orders_parts SET part_names={} WHERE orderkey = 12345678;
+       DELETE part_names FROM orders_parts WHERE orderkey =12345678;
+
+5. DELETE entire row from cassandra
+       DELETE FROM orders_parts WHERE orderkey = 12345678;
+
+NOTE: in both DELETE and INSERT into set, the resulting set is sorted.
+
+
+
+
+
+
+
+
+
+

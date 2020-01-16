@@ -1,0 +1,60 @@
+QUESTIONS:
+In a text file answers.txt, answer these questions:
+
+1.)In the Reddit averages execution plan, which fields were loaded? 
+How was the average computed (and was a combiner-like step done)?
+ANS: output is "== Physical Plan ==
+        *(2) HashAggregate(keys=[subreddit#18], functions=[avg(score#16L)])
++- Exchange hashpartitioning(subreddit#18, 200)
+   +- *(1) HashAggregate(keys=[subreddit#18], functions=[partial_avg(score#16L)])
+      +- *(1) FileScan json [score#16L,subreddit#18] Batched: false, Format: JSON, Location: InMemoryFileIndex[hdfs://nml-cloud-149.cs.sfu.ca:8020/courses/732/reddit-1], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<score:bigint,subreddit:string>"
+     ReadSchema tells us that our code loads score and subreddit field in bigint and string type accordingly from sfu cloud server. 
+
+The .groupBy() and .agg() play part in HashAggregate......Exchange hashpartitioning.....HashAggregate. The step to compute average starts by doing partial_avg, then exchaning/shuffling, and doing avg. 
+The combiner acts as a mini-Reducer by helping aggregating items locally as to reduce network traffic before sending to Reducer. 
+We can see the combiner-like step in HashAggregate(.... partial_avg). 
+
+----------------------------------------------------------------------------------
+2.)What was the running time for your Reddit averages implementations in the five scenarios described above? 
+How much difference did Python implementation make (PyPy vs the default CPython)? 
+Why was it large for RDDs but not for DataFrames?
+ANS: #MapReduce running time: 2m36.3s, 1m37s, 1m59.6s
+     #Spark DataFrames (with CPython) running time: 1m48s, 1m21.7s, 1m32.2s
+     #Spark RDDs (with CPython) running time: 2m43.8s, 2m40.6s, 2m42.2s
+     #Spark DataFrames (with PyPy) running time: 1m34s, 1m31s, 1m32.7s
+     #Spark RDDs (with PyPy) running time: 1m40.5s, 1m29s, 1m29.3s
+
+RDDs: PyPy is faster than CPython about 1 minute 10 seconds because PyPy is just-in-time compiler. Most importantly, RDD does not have built-in optimization engine and it does not infer the schema of the ingested data (making it slow to handle structured data).
+ 
+DataFrames: PyPy and CPython have a very similar running time. DataFrame has additional metadata 
+because of its tabular format, which allows Spark to run certain optimization on the finalized query.
+
+----------------------------------------------------------------------------------
+3.)How much of a difference did the broadcast hint make to the Wikipedia popular code's running time (and on what data set)?
+ANS: All codes run on pagecounts-3 dataset. 
+
+With textwrap library, ->With broadcast, total running time is 8mins 45s 
+while, without broadcast, the total running time is 10mins 51s and sometimes it fails to finish the task. (I suspect that textwrap.wrap may do some expensive operations.)
+
+No library (just string length manipulation), ->With broadcast, total running time is 1mins 30s 
+while without broadcast the total running time is 5 mins 31s.
+
+---------------------------------------------------------------------------------  
+4.)How did the Wikipedia popular execution plan differ with and without the broadcast hint?
+ANS: No Broadcast: it needs to do the following plans: 
+                  After Max part: Exchange hashpartitioning -> Sort
+                  Join part: Exchange hashpartitioning -> Sort -> SortMergeJoin -> Exchange rangepartitioning
+     Have Broadcast: it needs to do the following plans:
+                  After Max part: BroadcastExchange 
+                  Join part: BroadcastHashJoin -> Exchange rangepartitioning
+      Note: there are extra steps for non-broadcast codes which will hugely affect the running time if we have 2 unbalanced dataframes (very large and very small dataframes).
+
+---------------------------------------------------------------------------------
+5.)For the weather data question, did you prefer writing the “DataFrames + Python methods” style
+,or the “temp tables + SQL syntax” style form solving the problem? 
+Which do you think produces more readable code?
+ANS: I think SQL style is more readable but I don't like it because it is cumbersome to write createOrReplaceTempView every time before using SQL syntax. I like DataFrames + Python methods because it has very similar syntax with Pandas.
+
+------------------------------------------------------------------------
+
+      

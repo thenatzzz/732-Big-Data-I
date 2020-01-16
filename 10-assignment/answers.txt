@@ -1,0 +1,20 @@
+Nattapat Juthaprachakul, 301350117, njuthapr
+CMPT-732
+Assignment-10
+
+Questions:
+1.What happened to the HDFS file when one of the nodes it was stored on failed?
+ANS: For our cluster with default replication factor of 3 and many DataNodes , when a single DataNode is down, the cluster continues normally. 
+The data blocks in the DataNode that went down will be readily available in other alive DataNode (many copies).
+If the DataNode is down for so long, the NameNode will re-replicate those data blocks to maintain the replication factor in the DataNodes. 
+
+2.How did YARN/MapReduce behave when one of the compute nodes disappeared?
+ANS: With dafault replication factor of 3, if the DataNode disappears, the tasks running in that node will fail and these failed tasks will be re-assigned to other DataNodes for re-execution. 
+Therefore, there will not be any failed computation/execution for those tasks (just some delays for tasks to be re-scheduled and re-run in other node.)
+
+3.Were there more things you'd like to try with this cluster, 
+or anything you did try that you think should have been in this assignment?
+ANS: Try all exercises with replication factor of 1 or one single DataNode. 
+Try bringing down many DataNode at the same time and see how fast the NameNode responds. 
+Try bringing down the NameNode???
+

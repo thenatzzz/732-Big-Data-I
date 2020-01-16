@@ -1,0 +1,60 @@
+BROADCAST
+== Physical Plan ==
+*(3) Sort [hour#15 DESC NULLS LAST], true, 0
++- Exchange rangepartitioning(hour#15 DESC NULLS LAST, 200)
+   +- *(2) BroadcastHashJoin [views#2L, hour#15], [max_views#53L, hour#150], LeftSemi, BuildRight
+      :- *(2) Filter (isnotnull(views#2L) && isnotnull(hour#15))
+      :  +- InMemoryTableScan [hour#15, title#1, views#2L], [isnotnull(views#2L), isnotnull(hour#15)]
+      :        +- InMemoryRelation [language#0, title#1, views#2L, content_size#3L, hour#15], StorageLevel(disk, memory, deserialized, 1 replicas)
+      :              +- *(2) Project [language#0, title#1, views#2L, content_size#3L, pythonUDF0#21 AS hour#15]
+      :                 +- BatchEvalPython [path_to_hour(hour#8)], [language#0, title#1, views#2L, content_size#3L, hour#8, pythonUDF0#21]
+      :                    +- *(1) Project [language#0, title#1, views#2L, content_size#3L, input_file_name() AS hour#8]
+      :                       +- *(1) FileScan csv [language#0,title#1,views#2L,content_size#3L] Batched: false, Format: CSV, Location: InMemoryFileIndex[hdfs://nml-cloud-149.cs.sfu.ca:8020/courses/732/pagecounts-0], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<language:string,title:string,views:bigint,content_size:bigint>
+      +- BroadcastExchange HashedRelationBroadcastMode(List(input[1, bigint, false], input[0, string, false]))
+         +- *(1) Filter (isnotnull(max_views#53L) && isnotnull(hour#150))
+            +- InMemoryTableScan [hour#150, max_views#53L], [isnotnull(max_views#53L), isnotnull(hour#150)]
+                  +- InMemoryRelation [hour#150, max_views#53L], StorageLevel(disk, memory, deserialized, 1 replicas)
+                        +- *(2) HashAggregate(keys=[hour#15], functions=[max(views#2L)])
+                           +- Exchange hashpartitioning(hour#15, 200)
+                              +- *(1) HashAggregate(keys=[hour#15], functions=[partial_max(views#2L)])
+                                 +- *(1) Project [views#2L, hour#15]
+                                    +- *(1) Filter ((((isnotnull(language#0) && isnotnull(title#1)) && (language#0 = en)) && NOT (title#1 = Main_Page)) && NOT (StartsWith(title#1, Special:) = true))
+                                       +- InMemoryTableScan [hour#15, language#0, title#1, views#2L], [isnotnull(language#0), isnotnull(title#1), (language#0 = en), NOT (title#1 = Main_Page), NOT (StartsWith(title#1, Special:) = true)]
+                                             +- InMemoryRelation [language#0, title#1, views#2L, content_size#3L, hour#15], StorageLevel(disk, memory, deserialized, 1 replicas)
+                                                   +- *(2) Project [language#0, title#1, views#2L, content_size#3L, pythonUDF0#21 AS hour#15]
+                                                      +- BatchEvalPython [path_to_hour(hour#8)], [language#0, title#1, views#2L, content_size#3L, hour#8, pythonUDF0#21]
+                                                         +- *(1) Project [language#0, title#1, views#2L, content_size#3L, input_file_name() AS hour#8]
+                                                            +- *(1) FileScan csv [language#0,title#1,views#2L,content_size#3L] Batched: false, Format: CSV, Location: InMemoryFileIndex[hdfs://nml-cloud-149.cs.sfu.ca:8020/courses/732/pagecounts-0], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<language:string,title:string,views:bigint,content_size:bigint>
+
+-----------------------------------------------------------------------------------------------------------------------
+NO BROADCAST
+== Physical Plan ==
+*(5) Sort [hour#15 DESC NULLS LAST], true, 0
++- Exchange rangepartitioning(hour#15 DESC NULLS LAST, 200)
+   +- SortMergeJoin [views#2L, hour#15], [max_views#53L, hour#150], LeftSemi
+      :- *(2) Sort [views#2L ASC NULLS FIRST, hour#15 ASC NULLS FIRST], false, 0
+      :  +- Exchange hashpartitioning(views#2L, hour#15, 200)
+      :     +- *(1) Filter (isnotnull(views#2L) && isnotnull(hour#15))
+      :        +- InMemoryTableScan [hour#15, title#1, views#2L], [isnotnull(views#2L), isnotnull(hour#15)]
+      :              +- InMemoryRelation [language#0, title#1, views#2L, content_size#3L, hour#15], StorageLevel(disk, memory, deserialized, 1 replicas)
+      :                    +- *(2) Project [language#0, title#1, views#2L, content_size#3L, pythonUDF0#21 AS hour#15]
+      :                       +- BatchEvalPython [path_to_hour(hour#8)], [language#0, title#1, views#2L, content_size#3L, hour#8, pythonUDF0#21]
+      :                          +- *(1) Project [language#0, title#1, views#2L, content_size#3L, input_file_name() AS hour#8]
+      :                             +- *(1) FileScan csv [language#0,title#1,views#2L,content_size#3L] Batched: false, Format: CSV, Location: InMemoryFileIndex[hdfs://nml-cloud-149.cs.sfu.ca:8020/courses/732/pagecounts-0], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<language:string,title:string,views:bigint,content_size:bigint>
+      +- *(4) Sort [max_views#53L ASC NULLS FIRST, hour#150 ASC NULLS FIRST], false, 0
+         +- Exchange hashpartitioning(max_views#53L, hour#150, 200)
+            +- *(3) Filter (isnotnull(max_views#53L) && isnotnull(hour#150))
+               +- InMemoryTableScan [hour#150, max_views#53L], [isnotnull(max_views#53L), isnotnull(hour#150)]
+                     +- InMemoryRelation [hour#150, max_views#53L], StorageLevel(disk, memory, deserialized, 1 replicas)
+                           +- *(2) HashAggregate(keys=[hour#15], functions=[max(views#2L)])
+                              +- Exchange hashpartitioning(hour#15, 200)
+                                 +- *(1) HashAggregate(keys=[hour#15], functions=[partial_max(views#2L)])
+                                    +- *(1) Project [views#2L, hour#15]
+                                       +- *(1) Filter ((((isnotnull(language#0) && isnotnull(title#1)) && (language#0 = en)) && NOT (title#1 = Main_Page)) && NOT (StartsWith(title#1, Special:) = true))
+                                          +- InMemoryTableScan [hour#15, language#0, title#1, views#2L], [isnotnull(language#0), isnotnull(title#1), (language#0 = en), NOT (title#1 = Main_Page), NOT (StartsWith(title#1, Special:) = true)]
+                                                +- InMemoryRelation [language#0, title#1, views#2L, content_size#3L, hour#15], StorageLevel(disk, memory, deserialized, 1 replicas)
+                                                      +- *(2) Project [language#0, title#1, views#2L, content_size#3L, pythonUDF0#21 AS hour#15]
+                                                         +- BatchEvalPython [path_to_hour(hour#8)], [language#0, title#1, views#2L, content_size#3L, hour#8, pythonUDF0#21]
+                                                            +- *(1) Project [language#0, title#1, views#2L, content_size#3L, input_file_name() AS hour#8]
+                                                               +- *(1) FileScan csv [language#0,title#1,views#2L,content_size#3L] Batched: false, Format: CSV, Location: InMemoryFileIndex[hdfs://nml-cloud-149.cs.sfu.ca:8020/courses/732/pagecounts-0], PartitionFilters: [], PushedFilters: [], ReadSchema: struct<language:string,title:string,views:bigint,content_size:bigint>
+ 

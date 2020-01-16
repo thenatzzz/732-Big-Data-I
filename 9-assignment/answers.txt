@@ -1,0 +1,53 @@
+CMPT-732, Assignment-9
+Name: Nattapat Juthaprachakul
+Computing id: njuthapr
+
+1.What is your best guess for the slope and intercept of the streaming points being produced?
+ANS: Slope= 61.126, Intercept= -9.625
+
+2.Is your streaming program's estimate of the slope and intercept getting better as the program runs?
+(That is: is the program aggregating all of the data from the start of time, or only those that have arrived since the last output?)
+ANS: Yes, but it does not take so long for slope(beta) output to be stable (get close to just single number).
+     However, it takes some time for an intercept(alpha) to settle in just one value.
+
+3.In the colour classification question, what were your validation scores for the RGB and LAB pipelines?
+ANS: Validation Score for RGB: 0.5917
+     Validation Score for LAB: 0.7044
+     note- classifier = MultilayerPerceptronClassifier(layers=[3,30,11])
+
+4.When predicting the tmax values, did you over-fit the training data (and for which training/validation sets)?
+ANS: Test dataset: tmax-test
+     Loss function: r2 loss
+     4.1)Training Dataset: tmax-1
+        -Without yesterday_tmax, Validation score=0.8632, Test score=0.5610
+        -With yesterday_tmax, Validation score=0.9105, Test score=0.8450
+     4.2)Training Dataset: tmax-2
+        -Without yesterday_tmax, Validation score=0.7877, Test score=0.7701
+        -With yesterday_tmax, Validation score=0.9089 ,Test score=0.9053
+   Note: our classifier is RandomForestRegressor(numTrees=7, maxDepth=8)
+   In summary, our model will be over-fitting or good-fitting depending 2 main factors: dataset and feature selection.
+   As we can see that when we include an important feature like yesterday's temperature,
+   both validation and test score of both datasets improve significantly.
+   For dataset factor, the models that are trained with dataset tmax-2 have better
+   Test score for both with and without 'yesterday_tmax' feature than models trained with dataset tmax-1.
+   Note: the model without 'yesterday_tmax' feature that is trained with dataset tmax-1
+          exhibits an over-fitting behavior as it has Validation score far higher than Test score.
+
+5.What were your testing scores for your model with and without the “yesterday's temperature” feature?
+ANS: Without "yesterday's temperature"(yesterday_tmax), Test score:0.5610 and 0.7701 (dataset: tmax-1,tmax-2 respectively)
+     With "yesterday's temperature"(yesterday_tmax), Test score:0.8450 and 0.9053 (dataset: tmax-1,tmax-2 respectively)
+
+6.If you're using a tree-based model, you'll find a .featureImportances property that describes the relative importance of each feature
+ (code commented out in weather_test.py; if not, skip this question).
+ Have a look with and without the “yesterday's temperature” feature: do the results make sense
+ and suggest that your model is making decisions reasonably?
+ With “yesterday's temperature”, is it just predicting “same as yesterday”?
+ANS: -Without "yesterday's temperature" feature, the 'day of the year' and 'latitude' feature are responsible for
+      52.95% and 39.01% feature importance respectively, which is a reasonable conclusion as
+      the closer the date in the year, the more similar weather/temperature pattern they are.
+      Furthermore, the latitude also plays key role as the higher latitude receives less sunlight
+      while the equator receives the most sunlight (temperature will be according to this pattern).
+    -With "yesterday's temperature" feature, it is responsible for 76.02% feature importance
+      while the second-most important feature is responsible for just 13.95% (the day of year).
+      This is a reasonable conclusion as today temperature will be very similar to tomorrow temperature.
+      (highly correlated feature).

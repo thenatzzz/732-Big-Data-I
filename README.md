@@ -3,7 +3,6 @@
 #### Tools: Hadoop, PySpark, Cassandra
 
 #### List of courseworks
-1. Wordcount with Hadoop
-
+1. Wordcount with Hadoop\
 Dataset: reddit
 2.

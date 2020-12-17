@@ -34,6 +34,11 @@
 -Loading Data Into Cassandra\
 -Loading Data With Spark
 8. Cassandra, CQL, Spark\
--Server Log Correlation with Cassandra Data
--Working With Relational Data
+-Server Log Correlation with Cassandra Data\
+-Working With Relational Data\
 -Reshape The Data
+9. Kafka, Spark ML\
+-Spark Streaming\
+-Spark ML: Colour Prediction\
+-Feature Engineering
+10. Cluster Simulation

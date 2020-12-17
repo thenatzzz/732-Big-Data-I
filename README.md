@@ -27,3 +27,13 @@
 6. Spark RDD, Spark SQL + DataFrames\
 -Server Log Correlation\
 -Shortest Paths in Graphs
+7. Cassandra, CQL, Spark\
+-Cassandra Clusters\
+-The CQL Shell & CQL Basics\
+-Replication and Failures\
+-Loading Data Into Cassandra\
+-Loading Data With Spark
+8. Cassandra, CQL, Spark\
+-Server Log Correlation with Cassandra Data
+-Working With Relational Data
+-Reshape The Data

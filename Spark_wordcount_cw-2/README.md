@@ -1,4 +1,4 @@
-# Introductions to MapReduce Framework and the cluster
+# MapReduce: Most-Viewed Wikipedia Pages with Hadoop
 ### Process
 1. Put some files in HDFS
 2. Compile a job
